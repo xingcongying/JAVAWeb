@@ -1,0 +1,33 @@
+CSS用于控制网页样式并允许将样式信息与网页内容分离的一种标记性语言
+格式:
+选择器：
+{
+ 属性：属性值；
+ 属性：属性值；
+}
+
+一、CSS和HTML结合的方式
+1、在标签的style属性上设置”属性：值”
+  <div style="border: 1px solid red">div</div>
+此种方式的缺点：
+(1) 若标签过多，代码量巨大
+(2) 无复用性可言
+(3) 可读性较差
+2、在head标签中使用style标签来定义各种自己需要的CSS样式：
+代码示例：在head标签中使用style标签定义CSS样式
+ <style type="text/css">
+            /*分别定义div、span标签，修改二者样式为边框1个像素，实线，红色*/
+        div{
+             border: 1px solid red;
+        }
+        span{
+           border: 1px solid red;
+        }
+    </style>
+   此种方式的缺点：只能在同一页面内复用代码，需要到每个页面修改样式，维护起来不方便
+   
+   
+3、把CSS样式写成一个单独的CSS文件，再通过link标签引入
+  (1) 创建CSS文件
+  (2) 在HTML文件的head标签中使用：
+<link rel = “stylesheet” type = “text/css” href = “创建的CSS文件路径”/>
