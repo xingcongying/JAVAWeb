@@ -31,3 +31,38 @@ CSS用于控制网页样式并允许将样式信息与网页内容分离的一�
   (1) 创建CSS文件
   (2) 在HTML文件的head标签中使用：
 <link rel = “stylesheet” type = “text/css” href = “创建的CSS文件路径”/>
+
+二、CSS选择器
+2.1 标签选择器
+div
+{
+属性：属性值；
+}
+
+2.2 id选择器（id是唯一的，每个id值在一个页面中只能使用一次）
+#id
+{
+属性 ：属性值；
+}
+
+2.3 class选择器(class值在一个页面中可以使用多次)
+.class
+{
+属性：属性值；
+}
+
+2.4 组合选择器
+选择器1，选择器2…选择器n{
+属性：值；
+}
+  <style type="text/css">
+        .class01,#id01{
+            color: #433cfa;
+            font-size: 20px;			 
+        }
+    </style>
+</head>						 
+<body>
+    <div class="class01">div1</div>
+    <div id="id01">div2</div>
+</body>
