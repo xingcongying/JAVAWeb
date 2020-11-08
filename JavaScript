@@ -429,6 +429,23 @@ document object model 文档对象模型，即把文档中的标签、属性、�
 (4)document.CreattElement(tagname):通过给定的标签名，创建一个dom对象,tagname是标签名
 
 
+十三、DOM模型中节点的常用属性和方法
+节点即标签对象
+1. 方法
+(1) appendChild(ChildNode)；添加一个子节点，ChildNode为添加的子节点
+(2) createTextNode(Text)；创建一个以Text为内容的文本节点
+2. 属性
+(1) childNodes：当前节点的所有子节点
+(2) firstChild：当前节点的第一个子节点
+(3) lastChild：当前节点的最后一个子节点
+(4) parentNode：当前节点的父节点
+(5) nextSibling：当前节点的下一个节点
+(6) previousSibling：当前节点的上一个节点
+(7) className：标签的class属性值
+(8) innerHTML：标签中的内容(包括两边的标签)
+(9) innerText：标签中的文本(不包括两边的标签)
+3. 注意：可以连写：document.getElementById(“xxx”).事件名 = function () {}
+
 
 
 
