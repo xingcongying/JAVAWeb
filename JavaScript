@@ -1,0 +1,438 @@
+一、JavaScript介绍
+
+JS运行在客户端，需要验证页面的数据，需要浏览器解析执行JS代码。
+特点：
+交互性(JS可完成信息的动态交互)
+安全性(不允许直接访问本地硬盘)
+跨平台性(只要是可以解析JS的浏览器都可执行，与平台无关)
+注意：JavaScript与Java无关联，JS是弱类型，Java是强类型
+强类型是定义变量时类型已经确定且不可变，弱类型是类型可变
+
+二、JavaScript和HTML代码结合的方式
+
+1. 在head或body标签中使用script标签书写JavaScript代码
+<script  type="text/javascript">  </script>
+2. 单独的创建JS文件，通过script标签引入
+<script  type="text/javascript"  src="JS文件路径"> </script>
+
+三、变量
+
+1. JavaScript中变量的类型
+函数：typeof() 取类型；
+数值类型： number
+字符串类型： string (首字母小写)
+对象类型： Object
+布尔类型： boolean
+函数类型： function
+2. JavaScript中的特殊值
+undefined：未定义，所有JS变量未赋予初始值时默认值均为undefined
+null：空值
+NaN：非数字，因为运算不能执行而导致，如数值和字符串运算，属于number类型
+3. JavaScript中定义变量的格式
+var 变量名；
+var 变量名 = 值；
+4. 补充知识：
+(1) typeof()是JS语言提供的一个函数，它可以返回参数的类型
+(2) JS语言中的注释写法与java一致
+
+四、关系运算
+等于，符号：==，简单的做字面值的比较
+全等于，符号：===，除了做字面值的比较之外，还会比较两个变量的数据类型是否一致
+
+五、逻辑运算
+
+1. &&：且运算
+第一种情况：表达式全为真，返回最后一个表达式的值
+第二种情况：表达式有一个为假，返回第一个为假的表达式的值(不是返回第一个表达式的值)
+2. ||：或运算
+第一种情况：表达式全为假，返回最后一个表达式的值
+第二种情况：表达式有一个为真，返回第一个为真的表达式的值(不是返回第一个表达式的值)
+3. !：取反运算
+注意：
+&&与||采取短路的策略，即确定了结果后，后面的表达式不再进行判断
+在JS语言中所有的变量都可以作为一个boolean类型使用，且0、null、undefined、
+””(空串)都认为是false
+
+六、数组
+
+数组的定义方式：
+var 数组名 = []；//空数组
+var 数组名 = [1,’abc’,true]；//定义数组的同时赋值，元素可多种类型
+注意：
+通过数组下标赋值，会根据最大下标值给数组自动扩容，默认值为undefined
+读取数组中已定义元素范围之外的元素，值为undefined，且读取不会自动扩容
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <script type="text/javascript">
+        var arr = [true, 1];
+        alert(arr.length); //2
+        arr[0] = 12;
+        arr[4] = "abc";
+        alert(arr.length); //5
+        alert(arr[6]); //undefined
+        alert(arr.length); //5
+        //数组的遍历
+        for (var i = 0; i < arr.length; i++) {
+            alert(arr[i]);
+        }
+        /*Google Chrome可以通过F12调出控制台*/
+    </script>
+</body>
+</html>
+
+七、函数
+
+1. 函数的定义方式一
+使用function关键字
+格式：(形参列表无需声明类型)
+function 函数名(形参列表) {
+函数体
+}
+注意：在JS语言中只需在函数体内直接使用return语句即可返回值，无需声明返回值类型
+
+   <script type="text/javascript">
+        //定义一个无参函数
+        function fun() {
+            alert("无参函数fun()被调用了！");
+        }
+        fun(); //函数定义后不会自动执行，调用之后才会执行
+        //定义一个带有返回值的有参函数
+        function fun2(a, b) {
+            return a + b;
+        }
+        alert(fun2(1, 2)); //3
+    </script>
+    
+    
+  2. 函数的定义方式二
+格式：(形参列表无需声明类型)
+var 函数名 = function(形参列表) {
+函数体
+}
+
+ <script type="text/javascript">
+        var fun = function () {
+            alert("无参函数！");
+        }
+        var fun2 = function (a, b) {
+            return a + b;
+        }
+        fun(); //无参函数
+        alert(fun2(1, 2)); //3
+    </script>
+    
+  注意：在JS中没有重载的概念，如果声明了多个重名的函数，不管函数的形参个数是否一致，不管调 用时传入几个参数，只会调用同名函数中的最后一个(会覆盖掉之前)，如：
+  function fun(a,b) {
+    alert("有参函数fun(a,b)");
+}
+function fun() {
+    alert("无参函数fun()");
+}
+fun(1,"ad"); //"无参函数fun()"
+
+
+八、函数的arguments隐形参数
+
+在函数调用时，浏览器每次都会传递进封装实参的对象arguments，虽然没有给被调用者定义形参， 但依然可以通过arguments调用传递进来的实参：
+arguments[i]: 获得传入的下标为i的参数值
+arguments.length: 获得传入的参数个数
+arguments.callee: 获得该函数本身(返回定义时的写法)
+注意：arguments是函数内固有变量，以数组的形式保存了调用方给该函数传入的所有参数
+
+九、JavaScript中的自定义对象
+
+1. Object形式的自定义对象
+var 对象名 = new Object()；//创建了一个空对象
+对象名.属性名 = 值；//给此对象定义属性
+对象名.函数名 = function() {} //给此对象定义函数
+对象名.属性名/函数名()；//对象的访问
+
+  var obj = new Object();
+     obj.name = "周杰伦";
+     obj.age = 18;
+     obj.fun = function () {
+         alert("姓名：" + this.name + "，年龄：" + this.age);
+     }
+     //对象的访问
+     obj.fun(); //姓名：周杰伦，年龄：18
+     
+ 2. 花括号形式的自定义对象
+(注意标点符号，最后一个成员不加逗号)
+var 对象名 = {
+属性名 ：值，
+函数名 ：function() {}
+
+var obj = {
+            name : "周杰伦",
+            age : 18,
+            fun : function () {
+                alert("姓名：" + this.name + " , 年龄：" + this.age);
+            }
+        };
+        obj.fun();
+        
+十、JavaScript中的事件
+
+1. 事件的概念
+电脑输入设备与页面进行交互的响应
+
+2. 常用的事件
+
+onload：页面加载完成事件，浏览器解析完页面之后就会自动触发的事件
+onclick：单击事件，常用于按钮的点击响应操作
+onblur：失去焦点事件(点中输入框准备输入数据时，光标闪烁，称为焦点)，常用于输入 框失去焦点后验证其输入内容是否合法
+onchange：内容发生改变事件，常用于下拉列表选中项发生改变后操作
+onsubmit：①表单提交事件，常用于表单提交之前验证所有表单项是否合法
+②onsubmit事件中return false可以阻止表单提交
+
+3. 事件的注册(绑定)
+
+告诉浏览器当事件响应后要执行哪些代码
+静态注册事件：通过HTML标签的事件属性直接赋予事件响应后的代码(写成函数形式)
+
+动态注册事件：步骤：
+(1) 通过document对象获取标签对象(Dom对象)
+(2) 通过标签对象.事件名 = function() {} 赋予事件响应后的代码，代表此标签具有此事件
+
+a、onload事件
+静态注册onload事件
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+        //静态注册onload事件的函数
+        function onloadFun() {
+            alert("静态注册onload事件！");
+        }
+    </script>
+</head>
+<body onload="onloadFun()"> <!--静态注册onload事件--> //函数名后一定要加括号
+</body>
+</html>
+运行结果：页面加载后出现提示框：静态注册onload事件！
+
+动态注册onload事件
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+    //window.onload页面加载完成之后自动执行function中的代码
+    window.onload = function () {
+        alert("动态注册的onload事件");
+    }
+    </script>
+</head>
+<body>
+</body>
+</html>
+</html>
+
+b、onclick事件
+静态注册
+<body>
+    <script type="text/javascript">
+        function onclickFun() {
+            alert("静态注册onclick事件");
+        }
+    </script>
+    <button onclick="onclickFun()">按钮</button>
+</body>
+运行结果：点击按钮之后出现提示框：静态注册onclick事件
+
+
+
+动态注册
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+        window.onload = function () {
+            /*动态注册步骤：(1) 获取标签对象
+                          (2) 标签对象.事件名 = function() {} */
+            /*1.获取标签对象，使用document.getElementById：
+                (1) document是JS语言提供的一个对象(文档)
+                (2) getElementById通过id属性获取标签对象
+                    也就是说此标签需要有id属性*/
+            var btnObj = document.getElementById("btn01");
+            //获取的btnObj为：[object HTMLButtonElement]
+            /*2.标签对象.事件名 = function(){}*/
+            btnObj.onclick = function () {
+                alert("动态注册onclick事件！");
+            }
+        }
+    </script> 
+</head>
+<body>
+    <button id="btn01">按钮</button>
+</body>
+运行结果：点击按钮之后出现提示框：动态注册onclick事件！
+
+c、onblur事件
+
+静态注册
+
+
+动态注册
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+        window.onload = function () {
+            /*动态注册步骤：(1) 获取标签对象
+                          (2) 标签对象.事件名 = function() {} */
+            /*1.获取标签对象，使用document.getElementById：
+                (1) document是JS语言提供的一个对象(文档)
+                (2) getElementById通过id属性获取标签对象
+                    也就是说此标签需要有id属性*/
+            var btnObj = document.getElementById("btn01");
+            //获取的btnObj为：[object HTMLButtonElement]
+            /*2.标签对象.事件名 = function(){}*/
+            btnObj.onclick = function () {
+                alert("动态注册onclick事件！");
+            }
+        }
+    </script> 
+</head>
+<body>
+    <button id="btn01">按钮</button>
+</body>
+运行结果：点击按钮之后出现提示框：动态注册onclick事件！
+
+d、onchange事件
+静态注册
+
+动态注册
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+        window.onload = function () {
+            var onchangeObj = document.getElementById("001");
+            onchangeObj.onchange = function () {
+                alert("选中项发生改变");
+            }
+        }
+    </script>
+</head>
+<body>
+    请选择：
+    <select id="001">
+        <option>选项1</option>
+        <option>选项2</option>
+        <option>选项3</option>
+    </select>
+</body>
+运行结果：与静态注册onchange事件一致
+
+e、onsubmit事件
+
+静态注册
+<body>
+    <!--return false可以阻止表单提交，一般写为return 函数(返回值是false)-->
+    <form action="http://localhost:63342" onsubmit="return onsubmitFun()">
+        <input type="submit" value="静态注册">
+    </form>
+    <script type="text/javascript">
+        function onsubmitFun() {
+            alert("发现不合法-静态注册onsubmit事件");
+            return false; //表单不会提交到服务器
+        }
+    </script>
+</body>
+
+动态注册
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+        window.onload = function () {
+            var formObj = document.getElementById("001");
+            //获取的formObj为：[object HTMLFormElement]
+            formObj.onsubmit = function () {
+                alert("数据不合法---动态注册onsubmit事件");
+                return false;
+            }
+        }
+    </script>
+</head>
+<body>
+    <form action="http://localhost:63342" id="001">
+        <input type="submit" value="动态注册"/>
+    </form>
+</body>
+运行结果：与静态注册onsubmit事件一致
+
+十、DOM对象
+
+document object model 文档对象模型，即把文档中的标签、属性、标签的值(文本) 转换成对象来管理
+1. Document对象
+2、Document对象的理解
+(1) Document管理了HTML文档的所有内容，将这些内容都对象化
+(2) Document是一种树形结构，有层级关系
+(3) 可以通过Document访问所有的对象
+3、Document对象中的方法介绍
+
+注意：
+查询优先顺序：id --> name --> tagName(越往后查询结果范围越大，还需过滤)
+三个查询方法一定要在页面加载完成之后执行才能查询到标签对象
+
+（1）document.getElementById(elementId):通过对标签的ID属性查找dom对象
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+        /*需求：当用户点击了校验按钮之后，验证内容是否合法，
+          验证的规则：必须由字母、数字、下划线组成，并且长度是5-12位*/
+        function onlickFun() {
+            var inputObj = document.getElementById("username");
+            //获得的inputObj：[object HTMLInputElement]
+            var usernameText = inputObj.value;
+            //value会随着输入框的内容发生改变，不仅仅是初始值
+            var usernameSpanObj = document.getElementById("usernameSpan");
+            var patt = /^\w{5,12}$/;或者new RegExp("^\\w{5,12}$");//需要转义
+            //正则表达式的test方法用于测试参数中的字符串是否符和正则表达式的规则
+            if (patt.test(usernameText)) {
+                //innerHTML属性表示起始标签与结束标签中的内容，此属性可读可写
+                usernameSpanObj.innerHTML = "用户名合法";
+            } else {
+                usernameSpanObj.innerHTML = "用户名不合法";
+            }
+        }
+    </script>
+</head>
+<body>
+    用户名：<input type="text" id="username" value="默认值">
+    <button onclick="onlickFun()">校验</button>
+    <span id="usernameSpan" style="color: red"></span>
+</body>
+</html>
+
+(2)document.getElementsByName(elementName):通过标签的name属性查找dom对象
+
+(3)document.getElementsByTagName(tagname):通过标签名性查找dom对象,tagname是标签名
+
+
+(4)document.CreattElement(tagname):通过给定的标签名，创建一个dom对象,tagname是标签名
+
+
+
+
+
+
+
+
+
