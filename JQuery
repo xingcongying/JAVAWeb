@@ -1,0 +1,5 @@
+一、jQuery介绍
+jQuery = JavaScript + Query，是辅助JavaScript开发的类库，它的核心思想是写的更少，做的更多，注意：使用jQuery一定要先通过script标签的src属性引入jQuery库.
+
+二、jQuery核心函数
+
