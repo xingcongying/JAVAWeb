@@ -1,1 +1,75 @@
+一、JavaWeb的概念
+JavaWeb是指所有通过Java语言编写的可以通过浏览器访问的程序的总称，
+JavaWeb是基于请求和响应来开发的
+请求(Request)：指客户端给服务器发送数据
+响应(Response)：指服务器给客户端回传数据
 
+二、Web资源的分类
+静态资源：html，css，js，txt，mp4，jpg等
+动态资源：jsp页面，Servlet程序
+
+三、Tomcat概念
+由Apache组织提供的一种Web服务器，提供对jsp和Servlet的支持，它是一种轻量级的javaweb
+容器(服务器)，也是目前应用最广泛的Javaweb服务器(免费)
+
+1.解压之后的目录介绍
+bin：存放Tomcat服务器的可执行程序
+conf：存放Tomcat服务器的配置文件
+lib：存放Tomcat服务器的jar包
+logs：存放Tomcat服务器运行时输出的日志信息
+temp：存放Tomcat服务器运行时产生的临时数据
+webapps：存放部署的Web工程
+work：存放Tomcat运行时jsp翻译为Servlet的源码和Session钝化的目录
+
+2.启动Tomcat服务器
+①找到Tomcat目录下的bin目录下的startup.bat文件，双击即可启动Tomcat服务器
+②测试Tomcat服务器启动成功与否(以下三选一即可):
+在浏览器的地址栏中输入以下地址(此时访问到的是Tomcat目录下的webapps目录中)：
+(1) http://localhost:8080
+(2) http://127.0.0.1:8080
+(3) http://真实ip:8080
+
+另一种启动Tomcat服务器的方式
+①打开命令行
+②cd到Tomcat安装目录下的bin目录下敲入启动命令：catalina run
+
+3.Tomcat服务器的停止
+以下方式三选一：
+① 点击已经启动Tomcat服务器的命令行窗口的x关闭按钮
+② 把Tomcat服务器窗口设置为当前窗口，然后按快捷键ctrl + c
+③ 双击Tomcat安装目录下的bin目录下的shutdown.bat文件
+
+4.修改Tomcat的端口号
+Tomcat的默认端口号是8080，修改方法如下：
+①找到Tomcat目录下的conf目录，打开server.xml配置文件
+②找到Connector标签，修改port属性值为想要的端口号，修改完端口号需重启Tomcat服务器方可生效。
+
+5.部署web工程到Tomcat中
+(1) 第一种部署方法：将web工程的目录拷贝到Tomcat的webapps目录下即可
+步骤如下：
+①在webapps目录下创建一个book工程(文件夹)：
+②将工程拷贝到book文件夹中：
+③访问Tomcat下的web工程：
+在浏览器的地址栏中输入：http://localhost:8080/工程名/文件名
+如：http://localhost:8080/book/index.html，即可打开索引页
+(2) 第二种部署方法：创建配置文件
+步骤如下：
+①在如图所示的目录下创建任意名字的xml文件：
+②此xml文件(UTF-8格式)中的内容为：
+<context path="/Test" docBase="E://book">
+其中：Context代表一个工程的上下文
+path代表工程的访问路径，即：/此文件名
+docBase代表要访问的工程目录在哪里(可以访问磁盘中的任何目录)
+注意：默认打开的是工程的index.html文件
+
+6、访问方式的区别
+(1) 拖动html页面到浏览器：
+①浏览器中的地址栏为：file:///E:/Tomcat/apache-tomcat-8.0.50/webapps/book/index.html
+②使用的是file://协议：浏览器直接读取file协议后面的路径，解析展示在浏览器上即可
+(2) 在浏览器的地址栏中输入http协议：
+
+
+
+配置资源热部署
+热部署就是正在运行状态的应用，修改了他的源码之后，在不重新启动的情况下能够自动把增量内容编译并部署到服务器上，使得修改立即生效。
+热部署为了解决的问题有两个， 一是在开发的时候，修改代码后不需要重启应用就能看到效果，大大提升开发效率；二是生产上运行的程序，可以在不停止运行的情况下进行升级，不影响用户使用。
