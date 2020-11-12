@@ -64,3 +64,92 @@ ServletConfig接口的三大作用：
 (1) 可以获取Servlet程序的别名(即web.xml的的内容)
 (2) 可以获取web.xml的初始化参数的值
 (3) 可以获取ServletContext对象
+
+注意：重写init方法时，必须要在函数体内写：super.init(config);
+原因：父类GenericServlet中的init方法将参数config保存起来，子类若不调用则无法保存
+
+
+五、ServletContext接口
+
+1、ServletContext接口表示Servlet上下文对象
+2、一个web工程只有一个ServletContext对象实例
+3、ServletContext是在web工程启动时创建，在web工程停止时销毁
+4、ServletContext对象是一个域对象
+域对象：像Map一样存取数据的对象称为域对象，域指的是存取数据的操作范围，
+ServletContext的域是整个web工程
+    
+            存数据              取数据                  删除数据
+Map         put()               get()                  remove()
+域对象     setAttribute()     getAttribute()          removeAttribute() 
+
+5、ServletContext接口的四个作用：
+(1) 获取web.xml中配置的上下文参数标签中的值
+(2) 获取当前工程的路径，格式：/工程路径，也就是Edit Configurations中Deployment中的 Application context的内容(即地址中8080之后，具体的打开的页面之前的内容)
+(3) 获取工程部署后在硬盘上的绝对路径
+(4) 像Map一样存取数据
+注意：一个web工程只会创建一个ServletContext对象实例，换其他类输出servletContext得到的结果与上述相同，且一旦给此对象赋值，即使换另一个类getAttribute(key1)，得到的结果也是value1
+
+六、HTTP协议
+
+1. 含义
+所谓协议指的是双方或多方相互约定好，都要遵守的规则，而HTTP协议指的是客户端和 服务器之间通信时发送的数据需要遵守的规则，HTTP协议中的数据又称为报文
+
+2. 请求的HTTP协议格式
+请求分为GET请求和POST请求两种：
+
+(1) GET请求：由请求行、请求头两部分组成，如下图所示：
+内容分析：
+请求行：
+①请求的方式：GET
+②请求的资源路径：/06_servlet/a.html
+③请求的协议的版本号：HTTP/1.1
+
+请求头：
+①Accept：告诉服务器，客户端可以接收的数据类型
+②Accept-Language：告诉服务器，客户端可以接收的语言类型：
+zh_CN：中文中国
+en_US：英文美国
+③User-Agent：代表客户端浏览器的信息
+④Accept-Encoding：告诉服务器，客户端可以接收的数据编码(压缩)格式
+⑤Host：表示请求时的服务器ip和端口号
+⑥Connection：告诉服务器，当前连接如何处理：
+Keep-Alive：回传完数据不要马上关闭，保持一小段时间的连接
+Closed：回传完数据马上关闭
+            
+(2) POST请求：由请求行、请求头、空行、请求体组成
+
+内容分析(仅分析与GET请求的不同之处)：
+请求头：
+①Referer：表示请求发起时，浏览器地址栏中的地址
+②Content-Type：表示发送的数据的类型：
+i. application/x-www-form-ur lencoded：表示提交的数据的格式是 name=value&name=value，然后对其进行url编码，url编码是把非英文内容转换为：%xx%xx
+ii. multipart/form-data：表示以多段的形式提交数据给服务器，即以流的形式提交，用于上传
+③Content-Length：表示发送的数据的长度
+④Cache-Control：表示如何控制缓存，no-cache不缓存
+
+(3). 常用请求头的说明
+Accept: 表示客户端可以接收的数据类型
+Accpet-Languege: 表示客户端可以接收的语言类型
+User-Agent: 表示客户端浏览器的信息
+Host： 表示请求时的服务器 ip 和端口号
+
+(4). 哪些是 GET 请求，哪些是 POST 请求
+GET 请求有哪些：
+1、form 标签 method=get
+2、a 标签
+3、link 标签引入 css
+4、Script 标签引入 js 文件
+5、img 标签引入图片
+6、iframe 引入 html 页面
+7、在浏览器地址栏中输入地址后敲回车
+
+POST 请求有哪些：
+8、form 标签 method=post
+c)响应的 HTTP 协议格
+
+(5). 常见的响应码
+200 表示请求成功
+302 表示请求重定向
+404 表示服务器收到请求，但是请求的数据不存在（请求地址错误）
+500 表示服务器收到请求，但是服务器内部错误（代码错误）
+
