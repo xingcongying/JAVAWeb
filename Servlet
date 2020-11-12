@@ -153,3 +153,66 @@ c)响应的 HTTP 协议格
 404 表示服务器收到请求，但是请求的数据不存在（请求地址错误）
 500 表示服务器收到请求，但是服务器内部错误（代码错误）
 
+
+七、HttpServletRequest类
+HttpServletRequest类的作用：
+每次只要有请求进入Tomcat服务器，Tomcat服务器就会把请求发来的HTTP协议信息解析好封装到Request对象中，然后传递到service方法中(调用doGet或doPost方法)供编程人员使用，编程人员通过HttpServletRequest对象，可以获取到请求的所有信息
+
+HttpServletRequest类的常用方法：
+getRequestURI()：获取请求的资源路径
+getRequestURL()：获取请求的绝对路径
+getRemoteHost()：获取客户端的ip地址
+getHeader()：获取请求头
+getParameter()：获取请求的参数
+getParameterValues()：获取请求的参数(多个值时使用) 如多选框
+getMethod()：获取请求的方式(GET或POST)
+setAttribute(key, value)：设置域数据
+getAttribute(key)：获取域数据
+getRequestDispatcher()：获取请求转发对象
+
+解决post中文乱码问题： req.setCharacterEncoding("UTF-8");
+
+八、请求转发
+请求转发指的是服务器收到请求之后，从一个资源跳转到另一个资源的操作，如图所示：
+
+浏览器（客户端）发送http://ip:port/工程名/servlet1 到 服务器（Tomcat）
+
+servlet1程序: 有没有带请求的参数，处理完业务盖章，转到servlet2
+servlet2程序：获取请求参数；检查有没有servlet1的章；处理自己的业务
+servlet1和servlet2可以共同完成一个业务，返回给浏览器，用户收到最终的结果
+从servlet1转到servlet2的操作叫做请求转发
+
+请求转发的特点：
+1、浏览器地址栏没有发生变化；
+2、它们是一次请求
+3、它们共享request域中的数据
+4、可以转发到web-info目录下
+5、不可以访问工程以外的资源
+
+九、base标签的作用
+base标签可以设置当前页面中所有相对路径跳转时参照指定的路径来进行跳转，在href属性中设置指定路径
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!--base标签写在<title>标签之后-->
+    <base href="http://localhost:8080/MyTest/a/b/">
+</head>
+<body>
+    这是a下的b下的c.html<br/>
+    <a href="../../index.html">跳到web下的index.html</a>
+</body>
+
+十、”/”在不同情况下的不同意义
+
+相对路径和绝对路径：实际开发中都使用绝对路径，而不简单的使用相对路径
+
+“/”若被浏览器解析，得到的地址是：http://ip:port/
+(1) 斜杠
+“/”若被服务器解析，得到的地址是：http://ip:port/工程路径
+(1) /servlet1
+(2) servletContext.getRealPath(“/”);
+(3) request.getRequestDispatcher(“/”);
+特殊情况：response.sendRedirect(“/”); 把斜杠发送到浏览器解析，得到http://ip:port/
+
+
