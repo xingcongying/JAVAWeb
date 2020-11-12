@@ -215,4 +215,73 @@ base标签可以设置当前页面中所有相对路径跳转时参照指定的�
 (3) request.getRequestDispatcher(“/”);
 特殊情况：response.sendRedirect(“/”); 把斜杠发送到浏览器解析，得到http://ip:port/
 
+十一、HttpServletResponse类
+1、HttpServletResponse类的作用：
+每次只要有请求进入Tomcat服务器，Tomcat服务器就会创建一个Response对象传递给Servlet程序。HttpServletResponse表示所有响应的信息(HttpServletRequest表示请求发来的信息)，可以通过HttpServletResponse对象设置返回给客户端的信息
+2、两个输出流的说明：
+字节流 getOutputStream(); 常用于下载(传递)二进制数据
+字符流 getWriter(); 常用于回传字符串
+注：同一个HttpServletResponse对象两个流不可同时使用，只可二选一，否则报错：
+3、从服务器往客户端(浏览器)回传字符串数据
+
+public class ResponseIO extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        //防止中文乱码问题，在获取流对象之前调用此方法：
+        //同时设置服务器和客户端都使用UTF-8字符集
+        response.setContentType("text/html; charset=UTF-8");
+        //获取流对象
+        PrintWriter writer = response.getWriter();
+        writer.write("I Love China！");
+    }
+}
+
+十二、请求重定向
+请求重定向指的是客户端给服务器发送请求，然后服务器通知客户端去访问自己的新地址(之前的地址可能被废弃)叫请求重定向。
+
+客户端（浏览器）发送地址http://ip:port/工程名/response1到服务器（Tomcat）
+随着项目的不断更新，response1这个接口已经被废弃，由新的接口response2取代，有义务告诉客户端 （响应码302）和新的地址（响应头location）
+客户端解析response1的结果，再次发起新地址的请求
+response2程取代了response1，功能更完善
+客户端收到最终的返回，解析展示在页面上。
+
+请求重定向的特点：
+1、浏览器地址栏会发生变化
+2、两次请求
+3、不共享Request域中的数据
+4、不能访问WEB-INF下的资源
+5、可以访问工程外的资源
+
+请求重定向的两种方法：
+方法一：
+        
+public class Response1 extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        System.out.println("会访问到Response1");
+        //1.设置响应状态码302
+        response.setStatus(302);
+        //2.设置响应头说明新的地址在哪里
+        response.setHeader("Location","http://localhost:8080/MyTest/Response2");
+    }
+}
+  
+方法二：
+response.sendRedirect(“http://localhost:8080/MyTest/Response2”);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
