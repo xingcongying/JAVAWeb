@@ -1,1 +1,190 @@
 
+一、JSP的介绍与创建
+JSP的全称是Java Server Pages，即Java的服务器页面
+JSP的主要作用是代替Servlet程序回传HTML页面的数据
+web目录(或其他)右击 --> new --> JSP/JSPX --> 输入文件名 --> 选择JSP file创建
+
+二、JSP的本质
+
+jsp 页面和 html 页面一样，都是存放在 web 目录下。访问也跟访问 html 页面一样。
+比如：
+在 web 目录下有如下的文件：
+web 目录
+a.html 页面 访问地址是 =======>>>>>> http://ip:port/工程路径/a.html
+b.jsp 页面 访问地址是 =======>>>>>> http://ip:port/工程路径/b.jsp
+
+JSP页面本质上是一个Servlet程序，第一次访问JSP页面时(运行Tomcat服务器后在浏览器地址栏输入路径)，
+Tomcat服务器会将此JSP页面翻译成为一个Java源文件，并对其进行编译成为.class字节码文件(一个.java，一个.class)
+
+三、JSP的语法
+
+JSP头部的page指令：
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+
+JSP头部的page指令可以修改JSP页面中的一些重要属性或行为
+(以下属性均写在page指令中，默认page指令中没有出现的属性都采用默认值)：
+
+(1) contentType属性：表示JSP返回的数据类型是什么，即response.setContentType()的参数值
+(2) language属性：表示JSP翻译之后是什么语言文件(目前只支持Java)
+(3) pageEncoding属性：表示当前JSP文件本身的字符集(可在IDEA右下角看到)
+(4) import属性：表示导包(导类)，与Java一致
+(5) autoFlush属性：设置当out输出流缓冲区满了之后是否自动刷新缓冲区，默认值是true
+(6) buffer属性：设置out缓冲区的大小，默认是8kb
+注意：out缓冲区满了之后不能自动刷新的话会报错
+(7) errorPage属性：设置当JSP页面运行出错时自动跳转到的页面(错误信息页面)的路径，这个 路径一般都是以斜杠打头，表示请求的地址是http://ip:port/工程路径/，对应代码web目录
+(8) isErrorPage属性：设置当前JSP页面是否是错误信息页面，默认是false，如果是true可以 获取错误信息
+(9) session属性：设置访问当前JSP页面时是否会创建HttpSession对象，默认值是true
+(10) extends属性：设置JSP页面翻译出来的Java类默认继承谁
+
+
+四、JSP中的常用脚本
+
+1. 声明脚本
+格式：<%! 声明Java代码 %>
+作用：可以给JSP翻译出来的Java类定义属性、方法、静态代码块、内部类等
+特点：不会在浏览器的页面上显示出来，仅存在于翻译后的Java类中
+
+2. 表达式脚本（重点，用的多）
+格式：<%=表达式 %>
+作用：在浏览器的JSP页面上输出数据(只有此脚本可以在浏览器的页面上输出数据)
+
+特点：
+(1) 所有的表达式脚本都会被翻译到对应的Java类的_jspService()方法中，故表达式脚本可以 直接使用_jspService()方法参数中的对象
+(2) 表达式脚本都会被编译后的Java类中的out.print()方法输出到浏览器页面上
+(3) 表达式脚本中的表达式不能以分号结束
+
+3. 代码脚本
+格式：<% Java语句 %>
+作用：在JSP页面中可以编写需要的Java代码
+特点：
+(1) 代码脚本翻译后都在_jspService方法中，故代码脚本可以直接使用此方法参数中的对象
+(2) 可以由多个代码脚本块组合完成一个完整的Java语句
+(3) 代码脚本还可以和表达式脚本一起组合使用，在JSP页面上输出数据
+
+
+五、JSP三种注释
+
+HTML注释：<!--HTML注释-->
+HTML注释会被翻译到JSP文件对应的Java类的_jspService方法中，以out.write()输出到客户端，
+write方法会自动识别标签，执行标签对应的功能，不会在浏览器的页面上输出注释
+Java注释：(1) //单行注释 (2) /*多行注释*/
+Java注释要写在声明脚本和代码脚本中才被认为是Java注释，会被翻译到JSP文件对应的Java类的_jspService方法中，在对应的Java类中也是注释
+JSP注释：<%- -这是JSP注释- -%>
+JSP注释中的内容不会在JSP文件翻译后的Java类中出现，即注释中的内容没有任何功能
+
+六、JSP九大内置对象
+
+JSP的内置对象指的是Tomcat服务器将JSP页面翻译为Java类之后内部提供的九大对象：
+(将page指令的isErrorPage属性写成true可以出现exception对象)
+
+equest：请求对象
+response：响应对象
+pageContext：JSP的上下文对象
+session：会话对象
+application：ServletContext对象
+config：ServletConfig对象
+out：JSP输出流对象
+page：指向当前JSP的对象
+exception：异常对象
+
+七、JSP四大域对象
+
+四大域对象经常用来保存数据信息。
+
+四个域对象分别是：
+pageContext (PageContextImpl 类) 当前 jsp 页面范围内有效
+request (HttpServletRequest 类)、 一次请求内有效
+session (HttpSession 类)、 一个会话范围内有效（打开浏览器访问服务器，直到关闭浏览器）
+application (ServletContext 类) 整个 web 工程范围内都有效（只要 web 工程不停止，数据都在）
+
+域对象是可以像 Map 一样存取数据的对象。四个域对象功能一样。不同的是它们对数据的存取范围。
+虽然四个域对象都可以存取数据。在使用上它们是有优先顺序的。
+四个域在使用的时候，优先顺序分别是，他们从小到大的范围的顺序。
+pageContext ====>>> request ====>>> session ====>>> application
+
+八、JSP的out输出和response.getWriter输出的异同
+
+相同点：response表示响应，用于给客户端(浏览器)返回内容
+out同样也是用于给客户端(浏览器)输出内容
+
+当JSP页面中所有代码执行完成后会做以下两个操作
+1、执行out.flush()操作，把out缓冲区的数据追加到response缓冲区的末尾
+2、执行response刷新操作，把全部数据写给客户端
+
+由于 jsp 翻译之后，底层源代码都是使用 out 来进行输出，所以一般情况下。我们在 jsp 页面中统一使用 out 来进行输出。避
+免打乱页面输出内容的顺序。
+out.write() 输出字符串没有问题
+out.print() 输出任意数据都没有问题（都转换成为字符串后调用的 write 输出）
+深入源码，浅出结论：在 jsp 页面中，可以统一使用 out.print()来进行输出
+
+九、JSP的常用标签
+
+1. 静态包含（常用）
+
+一个单独的jsp页面，只维护一份，该一处，其他同意被修改，比如页面下面的联系我们、加入我们等
+<%@ include file=""%> 就是静态包含
+file 属性指定你要包含的 jsp 页面的路径
+静态包含的特点：
+1、静态包含不会翻译被包含的 jsp 页面。
+2、静态包含其实是把被包含的 jsp 页面的代码拷贝到包含的位置执行输出。
+
+2. 动态包含
+
+(1)使用方法：
+<jsp:include page=””></jsp:include>
+其中page属性设置要包含的JSP页面，与静态包含一致
+
+(2)动态包含的特点：
+
+①动态包含将被包含的JSP页面翻译成.java.class文件
+②动态包含还可以传递参数
+③动态包含底层使用如下代码调用被包含的JSP页面执行输出：
+org.apache.jasper.runtime.JspRuntimeLibrary.include(request, response, “/foot.jsp”, out, false);
+
+注意：
+
+设置参数的标签要写在动态包含之中
+出现Expecting “jsp:param” standard action with “name” and “value” attributes异常，两个原因：
+①动态包含中未设置参数但没有把<jsp:include page=””></jsp:include>放在一行上
+②动态包含中加了注释
+
+3)jsp 标签-转发
+示例说明：
+<%--
+<jsp:forward page=""></jsp:forward> 是请求转发标签，它的功能就是请求转发
+page 属性设置请求转发的路径
+--%>
+<jsp:forward page="/scope2.jsp"></jsp:forward>
+
+十、ServletContextListener监听器
+
+1. Listener监听器的介绍
+
+(1) Listener监听器是JavaWeb的三大组件之一.JavaWeb 的三大组件分别是：Servlet 程序、Filter 过滤器、Listener 监听器
+(2) Listener监听器是JavaEE的规范(接口)
+(3) Listener监听器的作用是监听某件事物的变化，然后通过回调函数反馈给程序做一些处理。
+
+2. ServletContextListener监听器
+ServletContextListener监听器可以监听ServletContext对象的创建和销毁(web工程启动时创建，停止时销毁)，监听到创建和销毁之后都会调用ServletContextListener监听器的方法进行反馈：
+
+3. ServletContextListener监听器的使用步骤
+(1) 编写一个类实现ServletContextListener接口
+(2) 重写两个方法
+(3) 在web.xml文件中配置监听器
+
+public class ListenerTest implements ServletContextListener {
+    @Override
+    public void contextInitialized(ServletContextEvent servletContextEvent) {
+        System.out.println("ServletContext对象创建");
+    }
+    @Override
+    public void contextDestroyed(ServletContextEvent servletContextEvent) {
+        System.out.println("ServletContext对象销毁");
+    }
+}
+
+web.xml
+<listener>
+    <!-- <listener-class>标签中写上述程序的全类名 -->
+    <listener-class>com.qizegao.servlet.ListenerTest</listener-class>
+</listener>
