@@ -1,1 +1,68 @@
 
+一、JDBC概述
+在java中，数据库存取技术可分为如下几类：
+1、JDBC直接访问数据库
+2、JD0(JAVA Data Object)技术
+3、第三方O/R工具，如hibernate、mybatis
+JDBC是java访问数据库的基石，hibernate、mybatis只是更好的封装了JDBC。
+
+JDBC：Java DataBase Connectivity
+JDBC本质：SUN公司定义的一套操作所有关系型数据库的规则(接口)。各个数据库厂商去实现这个接口，提供数据库驱动jar包。我们可以使用这套接口进行编程，真正执行的代码是驱动jar包中的实现类
+
+二、快速入门
+
+1.导入驱动jar包
+2.注册驱动
+3.获取数据库连接对象 Connection
+4.定义sql语句
+5.获取执行sql语句的对象 Statement
+6.执行sql，接收返回结果
+7.处理结果
+8.释放资源，最后开启的资源要先释放
+释放的资源有ResultSet(仅查询时使用)、Statement、Connection
+
+三、数据库连接中使用到的类和接口
+DriverManager类：驱动管理对象
+Connection接口：数据库连接对象
+Statement接口：用于执行静态 SQL 语句并返回它所生成结果的对象 
+ResultSet接口：接收Statement接口返回的结果集对象
+PreparedStatement接口：是Statement的子接口，执行预编译SQL语句的对象(解决注入问题)
+
+1) DriverManager类
+驱动管理对象
+
+功能：
+注册驱动：告诉程序该使用哪一个数据库驱动jar包；
+
+2. 获取数据库连接：建立到给定数据库 URL 的连接
+static Connection getConnection(String url, String user, String password)
+参数： url：指定连接的路径
+其中协议与子协议是固定写法
+子名称是 ip地址(域名)：端口号/数据库名称
+注意：如果连接的是本机的默认端口号是3306的mysql服务器，url可简写：
+jdbc:mysql:///数据库名称，即省略ip地址(域名)：端口号
+user：数据库用户名
+Password: 数据库登陆密码
+
+(2) Connection接口
+数据库连接对象
+功能：
+
+1、获取执行sql语句的对象
+a. Statement createStatement( ) 创建一个 Statement 对象来将 SQL 语句发送到数据库
+b. PreparedStatement prepareStatement(String sql)
+创建一个 PreparedStatement 对象来将参数化的 SQL 语句发送到数据库
+2、管理事务：
+开启事务：void setAutoCommit(boolean autoCommit) 参数设置为false开启事务
+提交事务：void commit()
+回滚事务：void rollback()
+
+(3) Statement接口
+用于执行静态 SQL 语句并返回它所生成结果的对象
+
+1、int executeUpdate(String sql)
+执行除了select之外的其余sql语句，即不返回任何内容的sql语句，返回值是受影响的行数， 可以通过返回的int值判断sql语句是否执行成功(>0则成功，反之失败)，不使用ResultSet
+2、ResultSet executeQuery(String sql)
+执行给定的select语句，该语句返回单个 ResultSet 对象
+3、boolean execute(String sql)
+执行给定的 SQL 语句，该语句可能返回多个结果 (了解，不常用)
