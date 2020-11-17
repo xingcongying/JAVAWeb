@@ -1,1 +1,187 @@
 
+一、文件的上传介绍
+
+1.要有一个form标签，method = post请求方式，原因：文件的长度一般都会超过get请求的限制
+2. form标签的encType属性值必须为multipart/form-data
+3.在form标签中使用input标签，type = file添加上传的文件
+4.在form标签中使用input标签，type = submit提交到服务器
+5.编写Servlet程序接收、处理上传的文件
+注意：encType = multipart/form-data表示提交的数据以多段(每一个表单项表示一个数据段)的形式 进行拼接，然后以二进制流的形式发送给服务器
+
+二、服务器对上传的数据进行解析
+
+1、首先导入两个jar包 (fileupload包依赖io包)
+2、两个jar包中常用的类 (导入的jar包是commons的)：
+(1) ServletFileUpload类，用于解析上传的数据
+
+①public static final boolean isMultipartContent(HttpServletRequest request)
+如果上传的数据是多段的形式，返回true，只有多段的数据才是文件上传的
+②public ServletFileUpload()
+空参构造器
+③public ServletFileUpload(FileItemFactory fileItemFactory)
+参数为工厂实现类的构造器
+④public List parseRequest(HttpServletRequest request)
+解析上传的数据，返回包含每一个表单项的List集合
+(2) FileItem类，表示每一个表单项
+①public boolean isFormField()
+如果当前表单项是普通表单项，返回true，文件类型返回false
+②public String getFieldName()
+获取当前表单项的name属性值
+③public String getString()
+获取当前表单项的value属性值，参数为”UTF-8”可解决乱码问题
+④public String getName()
+获取上传的文件名
+⑤public void write(File file)
+将上传的文件写到参数File所指向的硬盘位置
+
+代码示例:
+jsp文件:
+<form action="http://localhost:8080/jstl/uploadServlet" method="post" enctype="multipart/form-data">
+    用户名：<input type="text" name="username"><br>
+    头像：<input type="file" name="photo"><br>
+    <input type="submit" value="上传">
+</form>
+
+public class upLoadServlet extends HttpServlet {
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        if (ServletFileUpload.isMultipartContent(request)) { 
+            //创建工厂实现类(FileItemFactory是一个接口，需要new其实现类)
+            FileItemFactory fileItemFactory = new DiskFileItemFactory();
+            //创建用于解析上传数据的工具类ServletFileUpload类
+            ServletFileUpload servletFileUpload = new ServletFileUpload(fileItemFactory);
+            try {
+                //解析上传的数据，得到每一个表单项FileItem
+                List<FileItem> list = servletFileUpload.parseRequest(request);
+                for (FileItem fileitem :
+                        list) {
+                    if (fileitem.isFormField()) {
+                        //普通表单项
+                        System.out.println("普通表单项的name属性值：" + fileitem.getFieldName());
+                        //参数UTF-8，解决乱码问题
+                        System.out.println("普通表单项的value属性值：" +
+                                fileitem.getString("UTF-8"));
+                    } else {
+                        //上传的是文件类型
+                        System.out.println("文件表单项的name属性值：" + fileitem.getFieldName());
+                        System.out.println("上传的文件名：" + fileitem.getName());
+                        //将文件写入磁盘指定的位置
+                        fileitem.write(new File("e:\\" + fileitem.getName()));
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+
+
+三、文件下载的过程
+
+1、获取要下载的文件名
+2、获取要下载的文件类型
+3、将获取的文件类型告诉客户端
+4、告诉客户端收到的数据用于下载使用
+5、获取要下载的文件并回传给客户端
+
+四、文件下载过程详解
+
+1、获取要下载的文件名：使用String定义要下载的文件名
+2、获取要下载的文件类型：
+通过ServletContext的getMimeType(); 参数是要下载的文件所在路径，返回值是String类型
+3、将获取的文件类型告诉客户端：
+通过HttpServletResponse的setContentType(); 参数是第二步的结果，无返回值
+4、告诉客户端收到的数据用于下载使用(没有此步则内容直接显示在页面上)：
+通过HttpServletResponse的setHeader();
+参数是"Content-Disposition", “attachment; fileName=xxx.xxx”
+注意：Content-Disposition响应头表示客户端收到的数据如何处理
+attachment表示附件，用于下载
+filename表示下载的文件名，可以与原文件名不同
+此方法无返回值
+5、获取要下载的文件并回传给客户端：
+回传给客户端通过导入的io包的IOUtils类的copy(InputStream input, OutputStream output);
+其中：
+①通过ServletContext的getResourceAsStream(); 参数是要下载的文件路径，得到输入流
+②通过HttpServletResponse的getOutputStream(); 得到响应的输出流
+
+
+五、中文名下载文件的乱码问题
+
+1、原因：
+response.setHeader(“Content-Disposition”, “attachment; fileName=中文名.jpg”);
+如果下载的文件是中文名，会发现下载的文件无法正常显示汉字，原因是响应头中不能有汉字
+2、解决：
+(1)当浏览器是IE浏览器或谷歌浏览器：
+需要使用URLEncoder类先对中文名进行UTF-8编码，因为IE浏览器和谷歌浏览器收到含有 编码的字符串后会以UTF-8字符集进行解码显示，代码如下：
+   //把中文名进行UTF-8编码操作
+   URLEncoder.encode("中文名.jpg", "UTF-8");
+   String str = "attachment; filename=" + URLEncoder.encode("中文名.jpg", "UTF-8");
+   //把编码后的字符串设置到响应头中
+   resp.setHeader("Content-Disposition", str);
+(2)当浏览器是火狐浏览器：使用BASE64编解码
+
+六、BASE64编解码
+
+import sun.misc.BASE64Decoder;
+import sun.misc.BASE64Encoder;
+//jdk8之后不再支持上述两个类
+public class Base64Test {
+    public static void main(String[] args) throws Exception {
+        String content = "这是需要Base64编码的内容";
+        System.out.println("初始内容：" + content);
+        // 创建一个Base64编码器
+        BASE64Encoder base64Encoder = new BASE64Encoder();
+        // 执行Base64编码操作，encode()参数是字节数组
+        String encodedString = base64Encoder.encode(content.getBytes("UTF-8"));
+        System.out.println("编码后的结果：" + encodedString );
+        // 创建Base64解码器
+        BASE64Decoder base64Decoder = new BASE64Decoder();
+        // 解码操作
+        byte[] bytes = base64Decoder.decodeBuffer(encodedString);
+        //以utf-8编码，以utf-8解码
+        String str = new String(bytes, "UTF-8");
+        System.out.println("解码后的结果：" + str);
+    }
+}
+
+
+七、火狐浏览器下载文件乱码问题的解决
+
+需要对中文名进行BASE64编码操作：
+这时候需要把请求头 Content-Disposition: attachment; filename=中文名
+编码成为 Content-Disposition: attachment; filename==?charset?B?xxxx?=
+对 =?charset?B?xxxxx?= 的说明：
+
+1、=? 表示编码内容的开始
+2、charset 表示字符集(UTF-8、GBK等)
+3、B 表示BASE64编码
+4、xxxx 表示BASE64编码后的内容
+5、?= 表示编码内容的结束
+
+代码：
+public class DownLoad extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String downLoadFileName = "2.jpg";
+        ServletContext servletContext = getServletContext();
+        //斜杠代表工程路径，对应web目录
+        String mimeType = servletContext.getMimeType("/File" + downLoadFileName);
+        resp.setContentType(mimeType);
+        //根据浏览器的不同进行不同的方式解决中文乱码
+        if (req.getHeader("User-Agent").contains("Firefox")) {
+            //火狐浏览器的解决方式
+            resp.setHeader("Content-Disposition","attachment; filename==?UTF-8?B?"
+               + new BASE64Encoder().encode("美女.jpg".getBytes("UTF-8")) + "?=");
+        } else {
+            //如果是IE浏览器或谷歌浏览器
+            resp.setHeader("Content-Disposition","attachment; filename="
+               + URLEncoder.encode("美女.jpg", "UTF-8"));
+        }
+        InputStream inputStream = servletContext.getResourceAsStream("/File" + downLoadFileName);
+        OutputStream outputStream = resp.getOutputStream();
+        IOUtils.copy(inputStream,outputStream);
+    }
+}
+运行结果：
+在web.xml中进行配置，访问到此类时会自动的开始下载
