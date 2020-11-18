@@ -405,3 +405,180 @@ void setBlob(int parameterIndex, InputStream inputStream)；
 可以实现更高效的批量操作
 
 六、操作Blob数据及进行批量操作
+
+1.向customers表插入Blob类型的数据
+Connection connection = null;
+PreparedStatement preparedStatement = null;
+try {
+    connection = JDBCUtils.getConnection();
+    String sql = "insert into customers(id,photo) values(?,?)";
+    preparedStatement = connection.prepareStatement(sql);
+    preparedStatement.setInt(1,19);
+    preparedStatement.setBlob(2,new FileInputStream("girl.jpg"));
+    preparedStatement.executeUpdate();
+} catch (SQLException | FileNotFoundException throwables) {
+    throwables.printStackTrace();
+} finally {
+    JDBCUtils.close(preparedStatement,connection);
+}
+
+2.读取customers表中Blob类型的数据，并输出到本地
+
+Connection connection = null;
+PreparedStatement preparedStatement = null;
+ResultSet resultSet = null;
+FileOutputStream fileOutputStream = null;
+InputStream inputStream = null;
+try {
+    connection = JDBCUtils.getConnection();
+    String sql = "select photo from customers where id = ?";
+    preparedStatement = connection.prepareStatement(sql);
+    preparedStatement.setInt(1,19);
+    resultSet = preparedStatement.executeQuery();
+    while (resultSet.next()) {
+        Blob blob = resultSet.getBlob("photo");
+        //调用Blob中的getBinaryStream方法获取指定文件的输入流
+        inputStream = blob.getBinaryStream();
+        //指定输出流
+        fileOutputStream = new FileOutputStream("result.jpg");
+        byte[] buffer = new byte[1024];
+        int len;
+        while ((len = inputStream.read(buffer)) != -1) {
+            fileOutputStream.write(buffer, 0, len);
+        }
+    }
+} catch (SQLException | FileNotFoundException throwables) {
+    throwables.printStackTrace();
+} catch (IOException e) {
+    e.printStackTrace();
+} finally {
+    JDBCUtils.close(resultSet,preparedStatement, connection);
+    if (inputStream != null) {
+        try {
+            inputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    if (fileOutputStream != null) {
+        try {
+            fileOutputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+} /*执行完毕，当前moudle下会出现result.jpg，内容是id=19的photo列*/
+
+注意：如果插入大小相匹配的Blob类型以后，还报错：xxx too large，那么在mysql的安装目录下，
+找my.ini文件在末尾加上如下的配置参数：max_allowed_packet=16M。同时注意：修改了my.ini文件之后，需要重新启动mysql服务。
+
+使用Statement语句中专门用来处理批量数据的方法
+介绍Statement中的几个方法：
+addBatch(String sql)；将给定的sql命令添加到此Statement对象的当前命令列表中，通过调用executeBatch 方法可以批量的执行此列表中的命令
+executeBatch()；将一批命令提交给数据库执行
+clearBatch()；清空此Statement对象的当前sql命令列表
+注意：1. MySQL服务器默认是关闭批处理服务的(不支持Batch方法)，如果需要让MySQL开启批处理的支持，通过在url后面加 ?rewriteBatchedStatements=true
+
+
+七、JDBC管理事务
+
+1、特点（ACID）
+A 原子性：一个事务是不可再分割的整体，要么都执行要么都不执行
+B 一致性：一个事务可以使数据从一个一致状态切换到另外一个一致的状态
+C 隔离性：一个事务不受其他事务的干扰，多个事务互相隔离
+D 持久性：一个事务一旦提交，则它对数据库中的数据改变是永久性的
+
+2、问题
+脏读、不可重复读、幻读
+
+3、隔离级别
+READ_UNCOMMITED
+READ_COMMITED解决脏读
+READ_REPEATED解决脏读、不可重复读
+SERIALLZABLE 完全解决（串行化）
+
+使用Connection接口的方法来管理事务：
+* 开启事务：在执行sql语句之前
+* 提交事务：当所有sql语句都可顺利执行
+* 回滚事务：执行sql语句时出现异常，在catch中回滚事务
+* 获取事务的隔离级别：int getTransactionIsolation()；返回隔离级别对应的int值
+* 设置事务的隔离级别：void setTransactionIsolation(int level)；
+注：参数一般使用全局常量：Connection.TRANSACTION_XXX
+
+public static void main(String[] args) {
+    //在user_table表中，AA给BB转账500元
+    Connection connection = null;
+    PreparedStatement preparedStatement1 = null;
+    PreparedStatement preparedStatement2 = null;
+    try {
+        //获取连接
+        connection = JDBCUtils.getConnection();
+        //开启事务
+        connection.setAutoCommit(false);
+        //定义sql语句
+        String sql1 = "update user_table set balance = balance - ? where user = ?";
+        String sql2 = "update user_table set balance = balance + ? where user = ?";
+        //创建PreparedStatement的对象
+        preparedStatement1 = connection.prepareStatement(sql1);
+        preparedStatement2 = connection.prepareStatement(sql2);
+        //给?赋值
+        preparedStatement1.setDouble(1, 500);
+        preparedStatement1.setString(2, "AA");
+        preparedStatement2.setDouble(1, 500);
+        preparedStatement2.setString(2, "BB");
+        //执行sql语句
+        preparedStatement1.executeUpdate();
+        //手动的抛出异常，测试回滚事务，
+        int i= 3 / 0; //产生异常ArithmeticException，跳转到catch结构中
+        preparedStatement2.executeUpdate();
+        //如果顺利执行完两条sql语句，则提交事务
+        connection.commit();
+        System.out.println("事务提交成功！");
+    } catch (Exception e) { //保证出现任何异常都回滚，将异常类改为最大
+        if (connection != null) {
+            try {
+                connection.rollback(); //抛出异常
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        }
+        e.printStackTrace();
+        System.out.println("事务回滚！");
+    } finally {
+        //未关闭连接时还可能执行其他的sql语句，故在执行close方法之前应当恢复自动提交功能
+        connection.setAutoCommit(true);
+        //两个PreparedStatement的对象均需关闭
+        JDBCUtils.close(preparedStatement1, connection);
+        if (preparedStatement2 != null) {
+            try {
+                preparedStatement2.close();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        }
+    }
+}
+
+
+八、数据库连接池
+
+1、概念：是一个存放数据库连接的容器，容器被创建之后，容器中会申请一些连接对象，当用户来访问数据库时，从容器中获取连接对象，用户访问完之后，会将连接对象归还给容器
+2、好处：节约资源、用户访问高效
+3、实现：使用javax.sql包下的DataSource接口，DataSource 接口由驱动程序供应商实现
+DataSource中的方法：
+*获取连接：Connection getConnection()；
+*归还连接：Connection中的close()方法：如果连接对象Connection是从连接池中获取 的，那么调用此方法则不会再关闭连接，而是将连接放回数据库连接池中
+4、C3P0数据库连接池技术
+使用步骤：
+1). 创建libs文件夹导入三个jar包，文件夹右击add as library 在这里插入图片描述
+2). 定义配置文件c3p0-config.xml并放在src目录下，获取连接时会自动的被读取，
+在配置文件中更改url等参数
+3). 创建数据库连接池对象： new ComboPooledDataSource();
+4). 调用对象名.getConnection()获取连接(需要几个连接数就调用几次)
+注意：在配置文件中可以定义new ComboPooledDataSource();时指定不同的参数, 从而调用不同的连接池对象，也可定义最大连接数、初始个数等参数
+
+
+
+
+九、Apache - DBUtils的使用
+
