@@ -1,0 +1,265 @@
+一、MVC 概念
+
+MVC 全称：Model 模型、 View 视图、 Controller 控制器。
+MVC 最早出现在 JavaEE 三层中的 Web 层，它可以有效的指导 Web 层的代码如何有效分离，单独工作。
+View 视图：只负责数据和界面的显示，不接受任何与显示数据无关的代码，便于程序员和美工的分工合作——JSP/HTML。
+Controller 控制器：只负责接收请求，调用业务层的代码处理请求，然后派发页面，是一个“调度者”的角色——Servlet。
+转到某个页面。或者是重定向到某个页面。
+Model 模型：将与业务逻辑相关的数据封装为具体的 JavaBean 类，其中不掺杂任何与数据处理相关的代码——JavaBean/domain/entity/pojo。
+MVC 是一种思想，MVC 的理念是将软件代码拆分成为组件，单独开发，组合使用（目的还是为了降低耦合度）。MVC 的作用还是为了降低耦合。让代码合理分层。方便后期升级和维护。
+
+
+二、编写图书模块的数据库表
+
+三、编写图书模块的 JavaBean
+
+public class Book {
+private Integer id;
+private String name;
+private String author;
+private BigDecimal price;
+private Integer sales;
+private Integer stock;
+private String imgPath = "static/img/default.jpg";
+
+无参有参构造方法、getset、tostring快捷键alt+insert
+
+四、编写图书模块的 Dao 和测试 Dao
+
+Dao接口：
+public interface BookDao {
+public int addBook(Book book);
+public int deleteBookById(Integer id);
+public int updateBook(Book book);
+public Book queryBookById(Integer id);
+public List<Book> queryBooks();
+}
+
+
+BookDaoImpl 实现类：
+public class BookDaoImpl extends BaseDao implements BookDao {
+@Override
+public int addBook(Book book) {
+String sql = "insert into t_book(`name`,`author`,`price`,`sales`,`stock`,`img_path`)
+values(?,?,?,?,?,?)";
+return update(sql,
+book.getName(),book.getAuthor(),book.getPrice(),book.getSales(),book.getStock(),book.getImgPath());
+}
+@Override
+public int deleteBookById(Integer id) {
+String sql = "delete from t_book where id = ?";
+return update(sql, id);
+}
+@Override
+public int updateBook(Book book) {
+String sql = "update t_book set `name`=?,`author`=?,`price`=?,`sales`=?,`stock`=?,`img_path`=?
+where id = ?";
+return
+update(sql,book.getName(),book.getAuthor(),book.getPrice(),book.getSales(),book.getStock(),book.ge
+tImgPath(),book.getId());
+}
+@Override
+public Book queryBookById(Integer id) {
+String sql = "select `id` , `name` , `author` , `price` , `sales` , `stock` , `img_path` imgPath
+from t_book where id = ?";
+return queryForOne(Book.class, sql,id);
+}
+@Override
+public List<Book> queryBooks() {
+String sql = "select `id` , `name` , `author` , `price` , `sales` , `stock` , `img_path` imgPath
+from t_book";
+return queryForList(Book.class, sql);
+}
+}
+
+
+五、编写图书模块的 Service 和测试 Service
+
+
+BookService 接口
+public interface BookService {
+public void addBook(Book book);
+public void deleteBookById(Integer id);
+public void updateBook(Book book);
+public Book queryBookById(Integer id);
+public List<Book> queryBooks();
+}
+BookServiceImpl 实现类：
+public class BookServiceImpl implements BookService {
+private BookDao bookDao = new BookDaoImpl();
+@Override
+public void addBook(Book book) {
+bookDao.addBook(book);
+}
+@Override
+public void deleteBookById(Integer id) {
+bookDao.deleteBookById(id);
+}
+@Override
+public void updateBook(Book book) {
+bookDao.updateBook(book);
+}
+@Override
+public Book queryBookById(Integer id) {
+return bookDao.queryBookById(id);
+}
+@Override
+public List<Book> queryBooks() {
+return bookDao.queryBooks();
+}
+}
+
+
+六、编写图书模块的 Web 层，和页面联调测试
+
+6.1.1、图书列表功能的实现
+BookServlet程序：查询全部图书，保存到request域中。转发到manager.jsp中
+manager.jsp： 从request域中获取全部图书信息。用JSTL表达式输出 
+
+6.1.2、BookServlet 程序中添加 list 方法
+protected void list(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
+IOException {
+//1 通过 BookService 查询全部图书
+List<Book> books = bookService.queryBooks();
+//2 把全部图书保存到 Request 域中
+req.setAttribute("books", books);
+//3、请求转发到/pages/manager/book_manager.jsp 页面
+req.getRequestDispatcher("/pages/manager/book_manager.jsp").forward(req,resp);
+}
+
+6.1.3、修改【图书管理】请求地址
+ <a href="manager/bookServlet?action=list">图书管理</a>
+ 
+6.1.4、修改 pages/manager/book_manager.jsp 页面的数据遍历输出
+ 
+ <c:forEach items="${requestScope.books}" var="book">
+<tr>
+<td>${book.name}</td>
+<td>${book.price}</td>
+<td>${book.author}</td>
+<td>${book.sales}</td>
+<td>${book.stock}</td>
+<td><a href="book_edit.jsp">修改</a></td>
+<td><a href="#">删除</a></td>
+</tr>
+</c:forEach>
+
+6.2、前后台的简单介绍
+
+前台是给普通用户用的，一般不需要权限检查，就可以访问的资源，比如淘宝不登录就可以访问商品
+
+后台：是给管理员使用的，一般都需要权限加成才可以访问到的资源、页面、功能。
+后台的地址是 /manager/bookServlet
+
+6.3、添加图书功能的实现
+
+6.3.1添加图书流程细节：
+添加图书页面→bookServlet程序：获取请求的参数封装成book对象。调用bookService.add()添加图书，跳到图书列表页面→图书页面刷新显示
+
+6.3.2、问题说明：表单重复提交：
+当用户提交完请求，浏览器会记录下最后一次请求的全部信息。当用户按下功能键 F5，就会发起浏览器记录的最后一次
+请求。
+
+6.3.3、BookServlet 程序中添加 add 方法
+
+protected void add(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
+IOException {
+// 1、获取请求的参数==封装成为 Book 对象
+Book book = WebUtils.copyParamToBean(req.getParameterMap(),new Book());
+// 2、调用 BookService.addBook()保存图书
+bookService.addBook(book);
+// 3、跳到图书列表页面
+// /manager/bookServlet?action=list
+// req.getRequestDispatcher("/manager/bookServlet?action=list").forward(req, resp);
+resp.sendRedirect(req.getContextPath() + "/manager/bookServlet?action=list");
+}
+
+6.3.4、修改 book_edit.jsp 页面
+
+<form action="manager/bookServlet" method="get">
+<input type="hidden" name="action" value="add" />
+
+6.4、删除图书功能的实现
+
+6.4.1、图解删除流程：
+浏览器发送地址 manager/bookServlet?action=delete&id=编号 到Bookservlet
+Bookservlet获取id，调用delete删除，重定向到图书列表。
+
+6.4.2、BookServlet 程序中的 delete 方法
+OException {
+// 1、获取请求的参数 id，图书编程
+int id = WebUtils.parseInt(req.getParameter("id"), 0);
+// 2、调用 bookService.deleteBookById();删除图书
+bookService.deleteBookById(id);
+// 3、重定向回图书列表管理页面
+// /book/manager/bookServlet?action=list
+resp.sendRedirect(req.getContextPath() + "/manager/bookServlet?action=list");
+}
+
+6.4.3、给 WebUtils 工具类添加转换 int 类型的工具方法
+
+public static int parseInt(String strInt,int defaultValue) {
+try {
+return Integer.parseInt(strInt);
+} catch (Exception e) {
+e.printStackTrace();
+}
+return defaultValue;
+}
+
+6.4.4、修改删除的连接地址：
+<a href="manager/bookServlet?action=delete&id=${book.id}" id="deleteClass">删除</a>
+
+6.5修改图书功能的实现
+
+6.5.1图解修改图书细节：
+
+a、点击修改，跳转路径manager/bookServlet?action=update&id=${book.id}
+b、获取要修改的图书信息 getBook（）
+获取图书编号，调用query（）得到要修改的图书信息，把图书保存到request域中，请求转发到book_edit.jsp
+c、把修改的图书信息，带到表单中显示
+d、book_edit.jsp页面提交给服务器保存修改
+e、保存修改图书的操作 update（）
+// 1、获取请求的参数==封装成为 Book 对象
+// 2、调用 BookService.updatek()保存图书
+// 3、重定向到图书列表页面 manager/bookServlet?action=list
+f、刷新页面数据
+
+6.5.2、更新【修改】的请求地址：
+<a href="manager/bookServlet?action=getBook&id=${book.id}">修改</a>
+
+6.5.3、BookServlet 程序中添加 getBook 方法：
+protected void getBook(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
+IOException {
+//1 获取请求的参数图书编号
+int id = WebUtils.parseInt(req.getParameter("id"), 0);
+//2 调用 bookService.queryBookById 查询图书
+Book book = bookService.queryBookById(id);
+//3 保存到图书到 Request 域中
+req.setAttribute("book", book) ;
+//4 请求转发到。pages/manager/book_edit.jsp 页面
+req.getRequestDispatcher("/pages/manager/book_edit.jsp").forward(req,resp);
+}
+
+6.5.4、在 book_edit.jsp 页面中显示修改的数据
+
+<td><input name="name" type="text" value="${requestScope.book.name}"/></td>
+<td><input name="price" type="text" value="${requestScope.book.price}"/></td>
+<td><input name="author" type="text" value="${requestScope.book.author}"/></td>
+<td><input name="sales" type="text" value="${requestScope.book.sales}"/></td>
+<td><input name="stock" type="text" value="${requestScope.book.stock}"/></td>
+
+6.5.5、在 BookServlet 程序中添加 update 方法：
+
+protected void update(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
+IOException {
+// 1、获取请求的参数==封装成为 Book 对象
+Book book = WebUtils.copyParamToBean(req.getParameterMap(),new Book());
+// 2、调用 BookService.updateBook( book );修改图书
+bookService.updateBook(book);
+// 3、重定向回图书列表管理页面
+// 地址：/工程名/manager/bookServlet?action=list
+resp.sendRedirect(req.getContextPath() + "/manager/bookServlet?action=list");
+}
+
+6.5.6、解决 book_edit.jsp 页面，即要实现添加，又要实现修改操作。
