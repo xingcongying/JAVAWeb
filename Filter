@@ -1,1 +1,127 @@
 
+
+一、Filter过滤器的介绍
+1、Filter过滤器是JavaWeb三大组件之一，其余组件是：Servlet程序、Listener监听器
+2、Filter过滤器是JavaEE规范，也就是一个接口
+、Filter过滤器的作用是：拦截请求、过滤响应
+
+
+二、Filter过滤器的使用
+1、Filter过滤器的使用步骤：
+(1) 编写一个类实现Filter接口 (导入的包为：javax.servlet.Filter)
+
+(2) 实现三个方法：
+①实现过滤方法doFilter()，此方法中的：
+filterChain.doFilter(servletRequest,servletResponse);
+只有执行此方法，才可以访问拦截路径中的资源，若未执行此方法则代表拦截
+②实现init()方法
+③实现destroy()方法
+
+(3) 到web.xml中配置Filter的拦截路径
+<!--  Filter标签用于配置一个Filter过滤器，用法与Servlet标签一致  -->
+<filter>
+    <filter-name>LoginServlet</filter-name>
+    <filter-class>com.qizegao.Filter.LoginServlet</filter-class>
+</filter>
+<filter-mapping>
+    <filter-name>LoginServlet</filter-name>
+    <!--  url标签用于配置拦截路径，也就是访问哪些资源需要被拦截  -->
+    <!--  /表示工程路径，映射到web目录  -->
+    <!--  /*代表指定目录下的所有文件  -->
+    <url-pattern>/Admin/*</url-pattern>
+</filter-mapping>
+
+注意：
+1.Filter过滤器也支持注解，在首行加@WebFilter(“拦截路径”)，则无需web.xml文件
+2.浏览器不能直接访问实现Filter接口的类，只需访问拦截路径，就会自动的触发doFilter方法
+
+
+三、Filter过滤器的生命周期
+1.构造器方法
+2.init初始化方法
+3.doFilter方法 (其中有chain.doFilter方法)
+4.destroy方法
+其中：① 1和2在web工程启动的时候执行(即在创建Filter过滤器)
+② 第三步，符合拦截路径的请求发送到服务器的时候，自动的执行，若请求不属于拦截
+路径，则不会执行
+③ 第四步，停止web工程的时候执行(停止web工程，也会销毁Filter过滤器)
+
+
+四、FilterConfig类
+1.FilterConfig类是Filter过滤器的配置文件类，每次创建Filter的时候，也会创建一个FilterConfig
+类，其中包含了Filter配置文件的配置信息
+
+2.FilterConfig类的作用是获取Filter过滤器的配置文件内容：
+(1) 获取Filter的名称，即web.xml文件中标签的值：
+filterConfig.getFilterName();
+(2) 获取web.xml文件中标签的值(写在filter标签中，可写多个)，如：
+在这里插入图片描述
+(3) 获取ServletContext对象：filterConfig.getServletContext()
+
+五、FilterChain过滤器链
+
+作用：解决多个过滤器如何一起工作
+
+注意：
+
+上述两个Filter拦截的资源路径相同，代表一定会执行两个Filter过滤器的doFilter方法， 但因为手动注释不一定执行其中的chain.doFilter方法
+如果两个Filter拦截资源不同，且拦截资源符合Filter1，不符合Filter2，则会执行Filter1 的doFilter方法，且执行其中的chain.doFilter方法时，不会去执行Filter2的doFilter方法， 直接去访问资源，之后执行Filter1的后置代码(在chain.doFilter之后的均是后置代码)
+如果请求的资源不符合过滤器1和2的拦截路径，两个doFilter方法都不执行前置代码、chain.doFilter方法、后置代码都在doFilter方法中
+
+六、Filter的拦截路径
+
+1.精确匹配
+
+<url-pattern>/target.jsp</url-pattern>
+
+表示请求的地址必须为http://ip:port/工程路径/target.jsp，才可以触发doFilter方法
+
+2.目录匹配
+
+<url-pattern>/admin/*</url-pattern>
+表示请求的地址必须为http://ip:port/工程路径/admin/目录下所有的文件，才可以触发doFilter方法
+
+3.后缀名匹配
+
+<url-pattern>*.html</url-pattern>
+表示请求地址必须以.html结尾才可以触发doFilter方法
+
+<url-pattern>*.jsp</url-pattern>
+表示请求地址必须以.jsp结尾才可以触发doFilter方法
+
+注意：Filter过滤器只关心请求的地址是否符合拦截路径，不会关心请求的资源是否存在
+
+七、ThreadLocal 的使用
+
+1、ThreadLocal 的作用，它可以解决多线程的数据安全问题。
+2、ThreadLocal 它可以给当前线程关联一个数据（可以是普通变量，可以是对象，也可以是数组，集合）
+3、ThreadLocal 的特点：
+    1）、ThreadLocal 可以为当前线程关联一个数据。（它可以像 Map 一样存取数据，key 为当前线程）
+    2）、每一个 ThreadLocal 对象，只能为当前线程关联一个数据，如果要为当前线程关联多个数据，就需要使用多个
+    ThreadLocal 对象实例。
+    3）、每个 ThreadLocal 对象实例定义的时候，一般都是 static 类型
+    4）、ThreadLocal 中保存数据，在线程销毁后。会由 JVM 虚拟自动释放。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
