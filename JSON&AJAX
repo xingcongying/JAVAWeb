@@ -1,1 +1,76 @@
 
+一、JSON的介绍
+1、JSON是一种轻量级的数据交换格式，JSON采用完全独立于语言的文本格式，很多语言都提供了 对JSON的支持(C、JAVA、JavaScript等)，这就使得JSON成为理想的数据交换格式
+2、数据交换指的是客户端和服务器之间数据的传递格式
+
+二、JSON在JavaScript中的使用
+1、JSON的定义
+JSON是由键值对组成，并且由大括号包围，每个键由引号引起(不使用引号也可以)，键和值之间 使用冒号进行分割，多组键值对之间由逗号进行分割 (最后一组不加逗号)
+2、
+<script type="text/javascript">
+    var jsonObj = {
+        "key1":12,
+        "key2":"abc",
+        "key3":true,
+        "key4":[11,"arr",false],
+        //JSON中套JSON
+        "key5":{
+            "key5_1":551,
+            "key5_2":"key5_2"
+        },
+        //数组中放JSON
+        "key6":[{
+            "key6_1_1":611,
+            "key6_1_2":621
+        },{
+            "key6_2_1":621,
+            "key6_2_2":622
+        }]
+    };
+</script>
+
+3、JSON的访问
+JSON本身是一个对象，JSON中的key可以理解为是对象中的一个属性，JSON中的key的访问与 访问对象的属性一致：JSON对象.key
+
+三、JSON的两个常用方法
+1、JSON的存在有两种形式
+(1) 对象的形式存在，称为JSON对象
+此形式常用于操作JSON中的数据
+(2) 字符串的形式存在，称为JSON字符串
+此形式常用于在客户端和服务器之间进行数据的交换
+
+2、JSON的两个方法
+(1) JSON.stringify(JSON对象)：把JSON对象转换成为JSON字符串(类似JAVA中的toString方法)
+(2) JSON.parse(字符串)：把JSON字符串转换成为JSON对象
+
+四、JSON在Java中的使用
+
+public void test3(){
+    Map<Integer,Person> personMap = new HashMap<>();
+    personMap.put(1, new Person(1, "Dog"));
+    personMap.put(2, new Person(2, "Cat"));
+    Gson gson = new Gson();
+    String JsonString = gson.toJson(personMap);
+    System.out.println(JsonString); //{"1":{"id":1,"name":"Dog"},"2":{"id":2,"name":"Cat"}}
+    //将JSON字符串转换为集合时，还有一种简便方式：匿名内部类
+    Map<Integer,Person> personMap2 =
+         gson.fromJson(JsonString, new TypeToken<HashMap<Integer,Person>>(){}.getType());
+    System.out.println(personMap2); //{1=Person{id=1, name='Dog'}, 2=Person{id=2, name='Cat'}}
+}
+
+五、AJAX的介绍
+ASynchronous JavaScript And XML (异步的JavaScript和XML)，通过在后台与服务器 进行少量数据交换，Ajax可以使网页实现异步更新。
+这意味着可以在不重新加载整 个网页的情况下，对网页的某部分进行更新。传统的网页(不使用Ajax)如果需要更 新内容，必须重载整个网页页面。
+ajax 是一种浏览器异步发起请求。局部更新页面的技术。
+
+六、AJAX的使用
+语法：$.get(url，[data]，[callback]，[type])
+参数：url：请求路径
+data：请求参数(可选)
+callback：响应成功之后执行的函数(可选)
+type：响应结果的类型(可选)
+
+Jquery 的$.getJSON
+url:待载入页面的 URL 地址
+data:待发送 Key/value 参数。
+callback:载入成功时回调函数。
